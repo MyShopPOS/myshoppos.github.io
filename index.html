@@ -22,3 +22,132 @@
     }
   });
 </script>
+<script>
+  (function() {
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMobileMenu);
+    } else {
+      initMobileMenu();
+    }
+    
+    function initMobileMenu() {
+      const menuBtn = document.querySelector('button[aria-label="Toggle menu"]');
+      const navMenu = document.querySelector('nav');
+      
+      if (!menuBtn || !navMenu) return;
+      
+      // Create overlay for better UX
+      let overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 40;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+      `;
+      document.body.prepend(overlay);
+      
+      // Hide nav on desktop (let CSS handle it)
+      function isMobile() {
+        return window.innerWidth < 768;
+      }
+      
+      function toggleMenu() {
+        if (!isMobile()) {
+          // On desktop, reset styles and hide overlay
+          navMenu.style.display = '';
+          navMenu.style.flexDirection = '';
+          navMenu.style.position = '';
+          navMenu.style.top = '';
+          navMenu.style.left = '';
+          navMenu.style.right = '';
+          navMenu.style.backgroundColor = '';
+          navMenu.style.padding = '';
+          navMenu.style.gap = '';
+          navMenu.style.borderBottom = '';
+          navMenu.style.zIndex = '';
+          overlay.style.display = 'none';
+          overlay.style.opacity = '0';
+          menuBtn.setAttribute('aria-expanded', 'false');
+          return;
+        }
+        
+        const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+        
+        if (isExpanded) {
+          // Close menu
+          navMenu.style.display = '';
+          overlay.style.display = 'none';
+          overlay.style.opacity = '0';
+          menuBtn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        } else {
+          // Open menu
+          navMenu.style.display = 'flex';
+          navMenu.style.flexDirection = 'column';
+          navMenu.style.position = 'fixed';
+          navMenu.style.top = '64px';
+          navMenu.style.left = '0';
+          navMenu.style.right = '0';
+          navMenu.style.bottom = '0';
+          navMenu.style.backgroundColor = '#1a1712';
+          navMenu.style.padding = '2rem 1rem';
+          navMenu.style.gap = '1.5rem';
+          navMenu.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+          navMenu.style.zIndex = '50';
+          navMenu.style.overflowY = 'auto';
+          navMenu.style.alignItems = 'center';
+          
+          overlay.style.display = 'block';
+          setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+          
+          menuBtn.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        }
+      }
+      
+      // Click handler
+      menuBtn.addEventListener('click', toggleMenu);
+      
+      // Close on overlay click
+      overlay.addEventListener('click', function() {
+        if (menuBtn.getAttribute('aria-expanded') === 'true') {
+          toggleMenu();
+        }
+      });
+      
+      // Close on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') {
+          toggleMenu();
+        }
+      });
+      
+      // Handle window resize
+      let resizeTimeout;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+          if (!isMobile() && menuBtn.getAttribute('aria-expanded') === 'true') {
+            toggleMenu();
+          }
+        }, 250);
+      });
+      
+      // Close menu when clicking a nav link (on mobile)
+      navMenu.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          if (isMobile() && menuBtn.getAttribute('aria-expanded') === 'true') {
+            toggleMenu();
+          }
+        });
+      });
+    }
+  })();
+</script>
